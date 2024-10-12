@@ -12,7 +12,7 @@ const multer = require('multer');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage })
 app.use(cors({
-    origin: 'https://frontend-chi-lake-52.vercel.app/signUp',
+    origin: 'https://frontend-chi-lake-52.vercel.app',
     credentials: true
 }));
 app.use(express.json());
