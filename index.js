@@ -13,7 +13,8 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage })
 app.use(cors({
     origin: 'https://frontend-chi-lake-52.vercel.app',
-    credentials: true
+    credentials: true,
+    
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -39,7 +40,7 @@ app.post('/createUser', async (req, res) => {
                 });
 
                 let token = jwt.sign({ email, userid: newUser._id, name: newUser.name }, "sjjjjjjjjjjjj");
-                res.cookie("token", token, { httpOnly: true, secure: false });
+                res.cookie("token", token, { httpOnly: true, secure: true });
 
                 return res.status(201).json({ message: "User created successfully!" });
             } catch (error) {
@@ -60,7 +61,7 @@ app.post('/loginuser', async (req, res) => {
 
         if (result) {
             let token = jwt.sign({ email, userid: user._id }, process.env.JWT_SECRET || "sjjjjjjjjjjjj");
-            res.cookie("token", token, { httpOnly: true, secure: false });
+            res.cookie("token", token, { httpOnly: true, secure: true });
             return res.status(200).json({
                 message: "Login successful",
                 token,
