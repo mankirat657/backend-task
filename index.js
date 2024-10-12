@@ -12,7 +12,7 @@ const multer = require('multer');
 const storage = multer.memoryStorage();
 const upload = multer({ storage : storage })
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: ['http://localhost:5173','https://zingy-kitten-b1518b.netlify.app'],
     credentials: true 
 }));
 app.use(express.json());
