@@ -1,8 +1,8 @@
 // server.js
 const express = require('express');
 const app = express();
-const connectDb = require('./connection/connect'); 
-const User = require("./model/user"); 
+const connectDb = require('./connection/connect');
+const User = require("./model/user");
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
@@ -10,10 +10,10 @@ const cookieParser = require('cookie-parser');
 const Notes = require("./model/notes")
 const multer = require('multer');
 const storage = multer.memoryStorage();
-const upload = multer({ storage : storage })
+const upload = multer({ storage: storage })
 app.use(cors({
-    origin: ['http://localhost:5173','https://zingy-kitten-b1518b.netlify.app','https://frontend-chi-lake-52.vercel.app/signUp'],
-    credentials: true 
+    origin: 'https://frontend-chi-lake-52.vercel.app/signUp',
+    credentials: true
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -38,7 +38,7 @@ app.post('/createUser', async (req, res) => {
                     password: hash,
                 });
 
-                let token = jwt.sign({ email, userid: newUser._id, name  : newUser.name},"sjjjjjjjjjjjj"); 
+                let token = jwt.sign({ email, userid: newUser._id, name: newUser.name }, "sjjjjjjjjjjjj");
                 res.cookie("token", token, { httpOnly: true, secure: false });
 
                 return res.status(201).json({ message: "User created successfully!" });
@@ -61,60 +61,60 @@ app.post('/loginuser', async (req, res) => {
         if (result) {
             let token = jwt.sign({ email, userid: user._id }, process.env.JWT_SECRET || "sjjjjjjjjjjjj");
             res.cookie("token", token, { httpOnly: true, secure: false });
-            return res.status(200).json({ 
-                message: "Login successful", 
-                token, 
-                user: { name: user.name, email: user.email }  
+            return res.status(200).json({
+                message: "Login successful",
+                token,
+                user: { name: user.name, email: user.email }
             });
         } else {
             return res.status(401).json({ error: "Invalid credentials" });
         }
     });
 });
-app.post('/logout' , async(req,res)=>{
+app.post('/logout', async (req, res) => {
     res.clearCookie("token");
     return res.status(200).json({ msg: "User logged out successfully" });
-}) 
-const verifyToken = (req,res,next) =>{
+})
+const verifyToken = (req, res, next) => {
     const token = req.cookies.token;
-    if(!token) return res.status(401).json({error: "No token provided"})
+    if (!token) return res.status(401).json({ error: "No token provided" })
 
-    jwt.verify(token, process.env.JWT_SECRET || "sjjjjjjjjjjjj",(err,decoded)=>{
-        if(err) return res.status(403).json({error : "failded to authenticate token"})
+    jwt.verify(token, process.env.JWT_SECRET || "sjjjjjjjjjjjj", (err, decoded) => {
+        if (err) return res.status(403).json({ error: "failded to authenticate token" })
         req.userid = decoded.userid;
-        next()  
+        next()
     })
 }
-app.post('/createNotes',verifyToken, async(req,res)=>{
-    const {title,content,tags} = req.body;
-    console.log(title,content,tags);
-    
-    if(!title || !content) {
-        return res.status(400).json({error : "Title and Content are required"})
+app.post('/createNotes', verifyToken, async (req, res) => {
+    const { title, content, tags } = req.body;
+    console.log(title, content, tags);
+
+    if (!title || !content) {
+        return res.status(400).json({ error: "Title and Content are required" })
     }
     try {
         const newNote = await Notes.create({
             title,
             content,
             tags,
-            userId : req.userid
+            userId: req.userid
         })
-        return res.status(200).json({message : "Note created Successfully",note: newNote})
+        return res.status(200).json({ message: "Note created Successfully", note: newNote })
     } catch (error) {
-        console.error("error creating notes",error)
-        return res.status(500).json({error : "Error creating note"})
+        console.error("error creating notes", error)
+        return res.status(500).json({ error: "Error creating note" })
     }
 
 })
-app.get('/notes', verifyToken, async(req,res) =>{
-        try {
-            const notes = await Notes.find({userId : req.userid})
-            return res.status(200).json(notes)
-        } catch (error) {
-            console.error("Error fetching notes",error);
-            return res.status(500).json("Error fetching the notes")
-            
-        }
+app.get('/notes', verifyToken, async (req, res) => {
+    try {
+        const notes = await Notes.find({ userId: req.userid })
+        return res.status(200).json(notes)
+    } catch (error) {
+        console.error("Error fetching notes", error);
+        return res.status(500).json("Error fetching the notes")
+
+    }
 })
 app.post('/updateNotes', verifyToken, async (req, res) => {
     const { newTitle, newContent, newTags, prevTitle } = req.body;
@@ -130,9 +130,9 @@ app.post('/updateNotes', verifyToken, async (req, res) => {
 
     try {
         const updatedNote = await Notes.findOneAndUpdate(
-            { title: prevTitle, userId: req.userid }, 
-            updateFields,  
-            { new: true } 
+            { title: prevTitle, userId: req.userid },
+            updateFields,
+            { new: true }
         );
 
         if (!updatedNote) {
@@ -149,8 +149,8 @@ app.post('/updateNotes', verifyToken, async (req, res) => {
 
 app.post('/deleteNotes', verifyToken, async (req, res) => {
     const { prevTitle } = req.body;
-    
-    if (!prevTitle) { 
+
+    if (!prevTitle) {
         return res.status(400).json({ message: "Title is required to delete a note." });
     }
     try {
@@ -177,11 +177,11 @@ app.post('/upload', verifyToken, upload.single('profilePic'), async (req, res) =
         }
 
         const updatedUser = await User.findByIdAndUpdate(
-            req.userid, 
-            { 
+            req.userid,
+            {
                 profilePic: req.file.buffer,
-                contentType: req.file.mimetype 
-            }, 
+                contentType: req.file.mimetype
+            },
             { new: true }
         );
 
